@@ -13,10 +13,8 @@ if [ ! -f "$MODEL_PATH" ]; then
     "https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/v9/wan2.2-i2v-rapid-aio-nsfw-v9.2.safetensors"
 fi
 
-# clip_vision Modell separat installieren
-mkdir -p ComfyUI/models/clip_vision
-wget -O ComfyUI/models/clip_vision/clip_vision_h.safetensors \
-    "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors"
+# Aktivieren des venv
+source /workspace/ComfyUI/venv/bin/activate
 
 # Start ComfyUI
 python3 ComfyUI/main.py --listen 0.0.0.0
