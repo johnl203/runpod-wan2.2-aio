@@ -22,7 +22,7 @@ RUN /workspace/ComfyUI/venv/bin/pip install -r /workspace/ComfyUI/requirements.t
 
 # VideoHelperSuite als Custom Node
 RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git /workspace/ComfyUI/custom_nodes/VideoHelperSuite
-RUN /workspace/ComfyUI/venv/bin/pip install /workspace/ComfyUI/custom_nodes/VideoHelperSuite/requirements.txt
+RUN /workspace/ComfyUI/venv/bin/pip install -r /workspace/ComfyUI/custom_nodes/VideoHelperSuite/requirements.txt
 
 # ComfyUI Manager installieren
 RUN /workspace/ComfyUI/venv/bin/pip install git+https://github.com/comfyanonymous/ComfyUI-Manager.git
