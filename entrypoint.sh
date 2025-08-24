@@ -48,3 +48,4 @@ PY
 
 echo "==> Starte ComfyUI auf 0.0.0.0:8188"
 exec python "${COMFYUI_ROOT}/main.py" --listen 0.0.0.0
+
