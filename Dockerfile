@@ -1,51 +1,34 @@
-# ---- Basis: CUDA 12.8 Runtime (für Blackwell GPUs) ----
-FROM nvidia/cuda:12.8.1-runtime-ubuntu22.04
+# Base Image mit CUDA
+FROM nvidia/cuda:12.8.61-runtime-ubuntu22.04
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Grundinstallation
+RUN apt-get update && apt-get install -y \
+    git wget python3-pip ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
 
-# ---- Systempakete ----
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git python3 python3-venv python3-pip wget curl ca-certificates \
-    libgl1 libglib2.0-0 ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
-
-# ---- Arbeitsverzeichnis ----
 WORKDIR /workspace
 
-# ---- Python-Venv ----
-RUN python3 -m venv /workspace/venv
-ENV PATH="/workspace/venv/bin:$PATH"
-RUN pip install --upgrade pip setuptools wheel
+# ComfyUI klonen
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git
 
-# ---- PyTorch Nightly mit CUDA 12.8 (Blackwell Support) ----
-RUN pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+# Python Dependencies
+RUN pip install --upgrade pip
+RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+RUN pip install -r ComfyUI/requirements.txt
 
-# ---- ComfyUI installieren ----
-ENV COMFYUI_ROOT=/workspace/ComfyUI
-RUN git clone https://github.com/comfyanonymous/ComfyUI.git ${COMFYUI_ROOT}
-RUN pip install --no-cache-dir -r ${COMFYUI_ROOT}/requirements.txt
+RUN git clone https://github.com/ltdrdata/ComfyUI-Manager /workspace/ComfyUI/custom_nodes/comfyui-manager
+RUN pip install /workspace/ComfyUI/custom_nodes/comfyui-manager/requirements.txt
 
-# - Custom Node -
-RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite ${COMFYUI_ROOT}/custom_nodes
+# VideoHelperSuite als Custom Node installieren
+RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git /workspace/ComfyUI/custom_nodes/VideoHelperSuite
+RUN pip install /workspace/ComfyUI/custom_nodes/VideoHelperSuite/requirements.txt
 
-# ---- Standard-Verzeichnisse ----
-ENV MODEL_DIR=${COMFYUI_ROOT}/models/checkpoints \
-    WORKFLOW_DIR=${COMFYUI_ROOT}/user/default/workflows/
+# Workflow in user/default/workflows kopieren
+RUN mkdir -p ComfyUI/user/default/workflows
+RUN wget -O ComfyUI/user/default/workflows/wan2.2-i2v-rapid-aio-example.json \
+    "https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/wan2.2-i2v-rapid-aio-example.json"
 
-RUN mkdir -p ${MODEL_DIR} ${WORKFLOW_DIR}
-
-# ---- Hugging Face URLs (können in RunPod überschrieben werden) ----
-ENV HF_MODEL_URL="https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/v9/wan2.2-i2v-rapid-aio-nsfw-v9.2.safetensors" \
-    HF_FILENAME="wan2.2-i2v-rapid-aio-nsfw-v9.2.safetensors" \
-    HF_WORKFLOW_URL="https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/wan2.2-i2v-rapid-aio-example.json" \
-    HF_WORKFLOW_FILENAME="wan2.2-i2v-rapid-aio-example.json"
-
-# ---- Entrypoint kopieren ----
+# Entrypoint
 COPY entrypoint.sh /workspace/entrypoint.sh
 RUN chmod +x /workspace/entrypoint.sh
-
-# ---- Exposed Port ----
-EXPOSE 8188
-
-# ---- Start ComfyUI ----
-CMD ["/workspace/entrypoint.sh"]
+ENTRYPOINT ["/workspace/entrypoint.sh"]

@@ -1,56 +1,22 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
+set -e
 
-# Venv aktivieren
-source /workspace/venv/bin/activate
+echo "Starting ComfyUI..."
 
-echo "==> Starte Initialisierung"
+# WAN2.2 Modell herunterladen, falls nicht vorhanden
+MODEL_PATH=ComfyUI/models/checkpoints/wan2.2-i2v-rapid-aio-nsfw-v9.2.safetensors
+mkdir -p $(dirname $MODEL_PATH)
 
-# --- Workflow-Download ---
-if [[ -n "${HF_WORKFLOW_URL:-}" ]]; then
-  mkdir -p "$WORKFLOW_DIR"
-  TARGET_WF="$WORKFLOW_DIR/$HF_WORKFLOW_FILENAME"
-  if [[ -f "$TARGET_WF" ]]; then
-    echo "==> Workflow existiert bereits: $TARGET_WF"
-  else
-    echo "==> Lade Workflow: $HF_WORKFLOW_URL"
-    wget -O "$TARGET_WF" "$HF_WORKFLOW_URL"
-    echo "==> Workflow gespeichert: $TARGET_WF"
-  fi
-else
-  echo "==> Kein Workflow angegeben – überspringe."
+if [ ! -f "$MODEL_PATH" ]; then
+    echo "WAN2.2 model not found, downloading..."
+    wget -c --progress=dot:giga -O $MODEL_PATH \
+    "https://huggingface.co/Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/v9/wan2.2-i2v-rapid-aio-nsfw-v9.2.safetensors"
 fi
 
-# --- Modell-Download ---
-if [[ -n "${HF_MODEL_URL:-}" ]]; then
-  mkdir -p "$MODEL_DIR"
-  TARGET="$MODEL_DIR/$HF_FILENAME"
-  if [[ -f "$TARGET" ]]; then
-    echo "==> Modell existiert bereits: $TARGET"
-  else
-    echo "==> Lade Modell: $HF_MODEL_URL"
-    wget -O "$TARGET" "$HF_MODEL_URL"
-    echo "==> Modell gespeichert: $TARGET"
-  fi
-else
-  echo "==> Kein Modell angegeben – überspringe."
-fi
+# clip_vision Modell separat installieren
+mkdir -p ComfyUI/models/clip_vision
+wget -O ComfyUI/models/clip_vision/clip_vision_h.safetensors \
+    "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors"
 
-# - Instal Extension pip -
-chmod +x /workspace/venv/bin/activate
-/workspace/venv/bin/activate
-python -m pip install -r ${COMFYUI_ROOT}/custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt
-
-# --- GPU Check (optional) ---
-python - <<'PY'
-import torch
-print("CUDA verfügbar:", torch.cuda.is_available())
-if torch.cuda.is_available():
-    print("GPU Name:", torch.cuda.get_device_name(0))
-    print("CUDA Version:", torch.version.cuda)
-    print("Torch Version:", torch.__version__)
-PY
-
-echo "==> Starte ComfyUI auf 0.0.0.0:8188"
-exec python "${COMFYUI_ROOT}/main.py" --listen 0.0.0.0
-
+# Start ComfyUI
+python3 ComfyUI/main.py --listen 0.0.0.0
