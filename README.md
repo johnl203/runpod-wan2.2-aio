@@ -1,0 +1,1 @@
+# runpod-wan2.2-aio
