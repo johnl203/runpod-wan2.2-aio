@@ -36,6 +36,11 @@ else
   echo "==> Kein Modell angegeben – überspringe."
 fi
 
+# - Instal Extension pip -
+chmod +x /workspace/venv/bin/activate
+/workspace/venv/bin/activate
+python -m pip install -r ${COMFYUI_ROOT}/custom_nodes/ComfyUI-VideoHelperSuite/requirements.txt
+
 # --- GPU Check (optional) ---
 python - <<'PY'
 import torch
