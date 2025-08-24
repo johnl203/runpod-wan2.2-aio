@@ -25,8 +25,8 @@ RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git /works
 RUN /workspace/ComfyUI/venv/bin/pip install -r /workspace/ComfyUI/custom_nodes/VideoHelperSuite/requirements.txt
 
 # ComfyUI Manager installieren
-RUN git clone https://github.com/comfyanonymous/ComfyUI-Manager.git /workspace/ComfyUI/custom_nodes/comfyui-manager
-RUN /workspace/ComfyUI/venv/bin/pip install -r /workspace/ComfyUI/custom_nodes/comfyui-manager/requirements.txt
+#RUN git clone https://github.com/comfyanonymous/ComfyUI-Manager.git /workspace/ComfyUI/custom_nodes/comfyui-manager
+#RUN /workspace/ComfyUI/venv/bin/pip install -r /workspace/ComfyUI/custom_nodes/comfyui-manager/requirements.txt
 
 # clip_vision Modell separat installieren
 RUN mkdir -p /workspace/ComfyUI/models/clip_vision
