@@ -25,9 +25,12 @@ ENV COMFYUI_ROOT=/workspace/ComfyUI
 RUN git clone https://github.com/comfyanonymous/ComfyUI.git ${COMFYUI_ROOT}
 RUN pip install --no-cache-dir -r ${COMFYUI_ROOT}/requirements.txt
 
+# - Custom Node -
+RUN git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite ${COMFYUI_ROOT}/custom_nodes
+
 # ---- Standard-Verzeichnisse ----
 ENV MODEL_DIR=${COMFYUI_ROOT}/models/checkpoints \
-    WORKFLOW_DIR=${COMFYUI_ROOT}/workflows
+    WORKFLOW_DIR=${COMFYUI_ROOT}/user/default/workflows/
 
 RUN mkdir -p ${MODEL_DIR} ${WORKFLOW_DIR}
 
