@@ -1,5 +1,5 @@
 # Base Image mit CUDA
-FROM nvidia/cuda:12.8.61-runtime-ubuntu22.04
+FROM nvidia/cuda:12.8.1-runtime-ubuntu22.04
 
 # Grundinstallation
 RUN apt-get update && apt-get install -y \
